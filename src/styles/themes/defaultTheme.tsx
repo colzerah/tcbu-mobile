@@ -24,6 +24,7 @@ const defaultTheme: DefaultTheme = {
     danger: '#dc3545',
     light: '#f8f9fa',
     dark: '#343a40',
+    black: '#000000',
   },
   fonts: {
     thin: 'Roboto-Thin',

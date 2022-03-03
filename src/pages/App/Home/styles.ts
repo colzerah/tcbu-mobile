@@ -25,13 +25,17 @@ export const TextEmpty = styled.Text`
   color: ${({ theme }) => theme.colors.gray};
 `;
 
-export const ContainerItem = styled.View`
+export const ContainerScroll = styled.ScrollView`
   padding: 7px;
-  flex-direction: row;
-  align-items: center;
   border-bottom-width: 1px;
   border-color: lightgray;
+`;
+
+export const ContainerItem = styled.View`
+  flex-direction: row;
+  align-items: center;
   justify-content: space-between;
+  height: 60px;
 `;
 
 export const ContentItem = styled.View`

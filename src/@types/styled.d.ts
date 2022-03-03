@@ -25,6 +25,7 @@ declare module 'styled-components' {
       danger: string;
       light: string;
       dark: string;
+      black: string;
     };
     fonts: {
       regular: string;

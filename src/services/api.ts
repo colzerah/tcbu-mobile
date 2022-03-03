@@ -2,7 +2,11 @@ import axios from 'axios';
 import { Platform } from 'react-native';
 import { getBundleId, getDeviceNameSync } from 'react-native-device-info';
 
-const api = axios.create();
+import env from '../config/env';
+
+const api = axios.create({
+  baseURL: env?.api,
+});
 
 // Parametros padrões
 api.defaults.headers.common.platform = Platform.OS;

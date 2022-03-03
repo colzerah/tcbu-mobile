@@ -5,10 +5,17 @@ import {
   RefreshControl,
   View,
 } from 'react-native';
+import { Users } from '~/dtos/IUser';
 import { useTheme } from 'styled-components';
 import { Avatar } from '~/components/Avatar';
 import { Button } from '~/components/Button';
 import { useNavigation } from '@react-navigation/native';
+import {
+  deleteUserRequest,
+  listUsersRequest,
+} from '~/services/requests/registersRequest';
+import { getBirthday } from '~/utils/masks';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   Container,
   TextEmpty,
@@ -17,149 +24,90 @@ import {
   ContainerItem,
   ContentItem,
   TextItem,
+  ContainerScroll,
 } from './styles';
 
 export function Home(): JSX.Element {
   const { navigate } = useNavigation();
   const { colors } = useTheme();
+  const [users, setUsers] = React.useState<Users[]>([] as Users[]);
+  const [usersAmount, setUsersAmount] = React.useState(0);
   const [refresh, setRefresh] = React.useState(false);
   const [refreshEnd, setRefreshEnd] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
+  const [userPage, setUserPage] = React.useState(1);
 
-  const data = [
-    {
-      id: 1,
-      code: '1',
-      name: 'Strogonof',
-      birthDate: '10',
-      photo:
-        'https://i.pinimg.com/originals/7c/c7/a6/7cc7a630624d20f7797cb4c8e93c09c1.png',
-    },
-    {
-      id: 2,
-      code: '2',
-      name: 'Stroble',
-      birthDate: '20',
-      photo:
-        'https://i.pinimg.com/originals/7c/c7/a6/7cc7a630624d20f7797cb4c8e93c09c1.png',
-    },
-    {
-      id: 3,
-      code: '3',
-      name: 'Jenifer',
-      birthDate: '30',
-      photo:
-        'https://i.pinimg.com/originals/7c/c7/a6/7cc7a630624d20f7797cb4c8e93c09c1.png',
-    },
-    {
-      id: 4,
-      code: '4',
-      name: 'Jenifer',
-      birthDate: '30',
-      photo:
-        'https://i.pinimg.com/originals/7c/c7/a6/7cc7a630624d20f7797cb4c8e93c09c1.png',
-    },
-    {
-      id: 5,
-      code: '3',
-      name: 'Jenifer',
-      birthDate: '30',
-      photo:
-        'https://i.pinimg.com/originals/7c/c7/a6/7cc7a630624d20f7797cb4c8e93c09c1.png',
-    },
-    {
-      id: 6,
-      code: '4',
-      name: 'Jenifer',
-      birthDate: '30',
-      photo:
-        'https://i.pinimg.com/originals/7c/c7/a6/7cc7a630624d20f7797cb4c8e93c09c1.png',
-    },
-    {
-      id: 7,
-      code: '3',
-      name: 'Jenifer',
-      birthDate: '30',
-      photo:
-        'https://i.pinimg.com/originals/7c/c7/a6/7cc7a630624d20f7797cb4c8e93c09c1.png',
-    },
-    {
-      id: 8,
-      code: '4',
-      name: 'Jenifer',
-      birthDate: '30',
-      photo:
-        'https://i.pinimg.com/originals/7c/c7/a6/7cc7a630624d20f7797cb4c8e93c09c1.png',
-    },
-    {
-      id: 9,
-      code: '3',
-      name: 'Jenifer',
-      birthDate: '30',
-      photo:
-        'https://i.pinimg.com/originals/7c/c7/a6/7cc7a630624d20f7797cb4c8e93c09c1.png',
-    },
-    {
-      id: 10,
-      code: '4',
-      name: 'Jenifer',
-      birthDate: '30',
-      photo:
-        'https://i.pinimg.com/originals/7c/c7/a6/7cc7a630624d20f7797cb4c8e93c09c1.png',
-    },
-    {
-      id: 11,
-      code: '3',
-      name: 'Jenifer',
-      birthDate: '30',
-      photo:
-        'https://i.pinimg.com/originals/7c/c7/a6/7cc7a630624d20f7797cb4c8e93c09c1.png',
-    },
-    {
-      id: 12,
-      code: '4',
-      name: 'Jenifer',
-      birthDate: '30',
-      photo:
-        'https://i.pinimg.com/originals/7c/c7/a6/7cc7a630624d20f7797cb4c8e93c09c1.png',
-    },
-  ];
+  useFocusEffect(
+    React.useCallback(() => {
+      setRefresh(true);
+      onRefresh();
+      setRefresh(false);
+    }, []),
+  );
+
+  React.useEffect(() => {
+    (async () => {
+      onRefresh();
+      setLoading(false);
+    })();
+  }, [refresh]);
+
+  const handleDelete = React.useCallback(async (id: string) => {
+    setRefresh(true);
+    await deleteUserRequest(id);
+    setRefresh(false);
+  }, []);
 
   const renderItem = ({ item }): JSX.Element => (
-    <ContainerItem>
-      <Avatar uri={item.photo} />
-      <ContentItem>
-        <TextItem>Codigo: {item.code}</TextItem>
-        <TextItem>Nome: {item.name}</TextItem>
-        <TextItem>Idade: {item.birthDate} anos</TextItem>
-      </ContentItem>
-      <Button
-        title="Editar"
-        height={50}
-        width={50}
-        type="edit"
-        onPress={() => navigate('UserForm', { user: item })}
-      />
+    <ContainerScroll>
+      <ContainerItem>
+        <Avatar uri={item.photo} />
+        <ContentItem>
+          <TextItem>Codigo: {item.code}</TextItem>
+          <TextItem>Nome: {item.name}</TextItem>
+          <TextItem>
+            Idade: {getBirthday({ nascimento: item.birthDate })} anos
+          </TextItem>
+        </ContentItem>
+        <Button
+          title="Editar"
+          height={50}
+          width={50}
+          type="edit"
+          onPress={() => {
+            navigate('UserForm', { user: item });
+          }}
+        />
 
-      <Button
-        title="Deletar"
-        height={50}
-        width={50}
-        type="delete"
-        onPress={() => console.log('Delete')}
-      />
-    </ContainerItem>
+        <Button
+          title="Deletar"
+          height={50}
+          width={50}
+          type="delete"
+          onPress={() => handleDelete(item.id)}
+        />
+      </ContainerItem>
+    </ContainerScroll>
   );
 
   const onRefresh = React.useCallback(async () => {
-    console.log('refresh');
+    const response = await listUsersRequest(1);
+    setUsers(response.users);
+    setUsersAmount(response.usersAmount);
+    setUserPage(1);
+    setRefresh(false);
   }, []);
 
   const onReached = React.useCallback(async () => {
     setRefreshEnd(true);
-    console.log('oi');
+
+    if (users.length < usersAmount) {
+      const response = await listUsersRequest(userPage + 1);
+      setUserPage(userPage + 1);
+      setUsers(response.users);
+    }
     setRefreshEnd(false);
-  }, []);
+  }, [userPage, users.length, usersAmount]);
 
   if (loading) {
     return (
@@ -179,13 +127,17 @@ export function Home(): JSX.Element {
           height={30}
           width={100}
           type="create"
-          onPress={() => navigate('UserForm')}
+          onPress={() => {
+            navigate('UserForm');
+          }}
         />
-        <UserQtd>{data.length} / 1</UserQtd>
+        <UserQtd>
+          {users.length} / {usersAmount}
+        </UserQtd>
       </Header>
 
       <FlatList
-        data={data}
+        data={users}
         keyExtractor={item => `${item.id}`}
         renderItem={renderItem}
         ListEmptyComponent={<TextEmpty>Nemhum usuário encontrado</TextEmpty>}

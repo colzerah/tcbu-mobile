@@ -345,6 +345,8 @@ PODS:
     - React-jsi (= 0.67.3)
     - React-logger (= 0.67.3)
     - React-perflogger (= 0.67.3)
+  - RNDateTimePicker (5.1.0):
+    - React-Core
   - RNDeviceInfo (8.4.9):
     - React-Core
   - RNImageCropPicker (0.37.3):
@@ -422,6 +424,7 @@ DEPENDENCIES:
   - React-RCTVibration (from `../node_modules/react-native/Libraries/Vibration`)
   - React-runtimeexecutor (from `../node_modules/react-native/ReactCommon/runtimeexecutor`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
   - RNDeviceInfo (from `../node_modules/react-native-device-info`)
   - RNImageCropPicker (from `../node_modules/react-native-image-crop-picker`)
   - RNScreens (from `../node_modules/react-native-screens`)
@@ -509,6 +512,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/runtimeexecutor"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
+  RNDateTimePicker:
+    :path: "../node_modules/@react-native-community/datetimepicker"
   RNDeviceInfo:
     :path: "../node_modules/react-native-device-info"
   RNImageCropPicker:
@@ -565,6 +570,7 @@ SPEC CHECKSUMS:
   React-RCTVibration: d0361f15ea978958fab7ffb6960f475b5063d83f
   React-runtimeexecutor: af1946623656f9c5fd64ca6f36f3863516193446
   ReactCommon: 650e33cde4fb7d36781cd3143f5276da0abb2f96
+  RNDateTimePicker: 1dd15d7ed1ab7d999056bc77879a42920d139c12
   RNDeviceInfo: 4944cf8787b9c5bffaf301fda68cc1a2ec003341
   RNImageCropPicker: 44e2807bc410741f35d4c45b6586aedfe3da39d2
   RNScreens: 2559f98b0835103cbef3b26ba77fa61d4bb37ae7

@@ -8,8 +8,15 @@ import { userFormSchema } from '~/utils/yupSchemas';
 import { ActivityIndicator, Keyboard } from 'react-native';
 import { MsgError } from '~/components/MsgError';
 import { useTheme } from 'styled-components';
-import ImagePicker from 'react-native-image-crop-picker';
+import ImagePicker, { ImageOrVideo } from 'react-native-image-crop-picker';
 import { useNavigation } from '@react-navigation/native';
+import { InputDate } from '~/components/InputDate';
+import {
+  addUserRequest,
+  editUserRequest,
+  updatePhotoRequest,
+} from '~/services/requests/registersRequest';
+import { Users } from '~/dtos/IUser';
 import {
   ContentView,
   Container,
@@ -20,13 +27,25 @@ import {
 interface IValues {
   code: string;
   name: string;
-  birthDate: string;
-  photo?: string;
+  birthDate: Date;
+  photo?: ImageOrVideo | string;
+  anexe?: ImageOrVideo;
 }
+
+interface IUserRequest {
+  id?: string;
+  code: string;
+  name: string;
+  birthDate: Date | string;
+}
+
+// ataulizar o refresh de baixo quando a lista tiver em 10
+// verificar a paginacao
 
 export function UserForm({ route }): JSX.Element {
   const bottomSheet = React.useRef();
-  const { setOptions } = useNavigation();
+
+  const { setOptions, navigate } = useNavigation();
   const { colors } = useTheme();
   const [loading, setLoading] = React.useState(true);
   const [avatarLoading, setAvatarLoading] = React.useState(false);
@@ -39,7 +58,7 @@ export function UserForm({ route }): JSX.Element {
       title: route.params?.user ? 'Editar Usuário' : 'Cadastrar Usuário',
       headerBackTitle: ' ',
     });
-  }, [setOptions]);
+  }, [route.params?.user, setOptions]);
 
   React.useEffect(() => {
     if (route.params?.user) {
@@ -55,8 +74,13 @@ export function UserForm({ route }): JSX.Element {
       width: 300,
       height: 400,
       cropping: true,
+      includeBase64: true,
     }).then(image => {
-      setInitialValues({ ...initialValues, photo: image.path });
+      setInitialValues({
+        ...initialValues,
+        anexe: image,
+        photo: `data:image/png;base64, ${image.data}`,
+      });
       setAvatarLoading(false);
     });
   };
@@ -68,20 +92,64 @@ export function UserForm({ route }): JSX.Element {
       width: 300,
       height: 400,
       cropping: true,
+      includeBase64: true,
     }).then(image => {
-      setInitialValues({ ...initialValues, photo: image.path });
+      setInitialValues({
+        ...initialValues,
+        anexe: image,
+        photo: `data:image/png;base64, ${image.data}`,
+      });
       setAvatarLoading(false);
     });
   };
 
-  const handleSubmitForm = (v: IValues): void => {
+  const createUser = React.useCallback(
+    async ({ name, code, birthDate }: IUserRequest): Promise<Users> => {
+      const response = await addUserRequest({ name, code, birthDate });
+      return response;
+    },
+    [],
+  );
+
+  const editUser = React.useCallback(
+    async ({ name, code, birthDate, id }: IUserRequest) => {
+      await editUserRequest({ name, code, birthDate, id });
+    },
+    [],
+  );
+
+  const handleSubmitForm = async (v: IValues): Promise<void> => {
     Keyboard.dismiss();
-    console.log({
-      name: v.name,
-      code: v.code,
-      birthDate: v.birthDate,
-      photo: initialValues.photo,
-    });
+    if (route.params?.user) {
+      await editUser({
+        id: route.params?.user.id,
+        name: v.name,
+        code: v.code,
+        birthDate: v.birthDate,
+      });
+
+      if (initialValues.anexe) {
+        await updatePhotoRequest({
+          file: initialValues.anexe,
+          userId: route.params?.user.id,
+        });
+      }
+    } else {
+      const response = await createUser({
+        name: v.name,
+        code: v.code,
+        birthDate: v.birthDate,
+      });
+
+      if (initialValues.anexe) {
+        await updatePhotoRequest({
+          file: initialValues.anexe,
+          userId: response.id,
+        });
+      }
+    }
+
+    navigate('Home');
   };
 
   if (loading) {
@@ -157,16 +225,14 @@ export function UserForm({ route }): JSX.Element {
               onChangeText={handleChange('name')}
             />
             {errors.name && <MsgError description={errors.name} />}
-            <Input
-              value={values.birthDate}
-              placeholder=""
+            <InputDate
+              date={values.birthDate}
               width={300}
               error={errors.birthDate}
               label="Idade:"
-              keyboardType="numeric"
-              onChangeText={handleChange('birthDate')}
+              onChange={handleChange('birthDate')}
             />
-            {errors.birthDate && <MsgError description={errors.birthDate} />}
+            {errors.birthDate && <MsgError description="idade é obrigatorio" />}
 
             <ContentView>
               <Button
